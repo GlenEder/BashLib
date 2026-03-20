@@ -76,7 +76,8 @@ if $delete_untracked; then
 fi
 
 if $all_files; then
-	changed_files=$("${SCRIPT_DIR}/git-status.sh" -f | grep -v "^??")
+	script_name="$(basename "$0")"
+	changed_files=$("${SCRIPT_DIR}/git-status.sh" -f | grep -v "^??" | grep -v "$script_name")
 	if [[ -z "$changed_files" ]]; then
 		log_info "No changed files found"
 		exit 0
