@@ -23,7 +23,7 @@ log_warning() {
 		return
 	fi
 
-	SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+	local SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 	source "${SCRIPT_DIR}/../utils/term-colors.sh"
 
 	if [[ -n "$LOG_FILE" ]]; then
