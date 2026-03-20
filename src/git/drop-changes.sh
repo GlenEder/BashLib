@@ -46,8 +46,37 @@ while [[ "$#" -gt 0 ]]; do
 	esac
 done
 
+if $delete_untracked; then
+	status_output=$("${SCRIPT_DIR}/git-status.sh")
+	untracked=$(echo "$status_output" | grep "^??" | cut -c 4-)
+	if [[ -z "$untracked" ]]; then
+		log_info "No untracked files to delete"
+	else
+		if $all_files; then
+			while IFS= read -r file; do
+				rm -rf "$file"
+				log_info "Deleted: $file"
+			done <<<"$untracked"
+		else
+			current_dir_real="$(realpath "$(pwd)")"
+			deleted_any=false
+			while IFS= read -r file; do
+				file_real="$(realpath "$file")"
+				if [[ "$file_real" == "$current_dir_real"/* ]]; then
+					rm -rf "$file"
+					log_info "Deleted: $file"
+					deleted_any=true
+				fi
+			done <<<"$untracked"
+			if ! $deleted_any; then
+				log_info "No untracked files to delete in current directory"
+			fi
+		fi
+	fi
+fi
+
 if $all_files; then
-	changed_files=$(git-status.sh -f)
+	changed_files=$("${SCRIPT_DIR}/git-status.sh" -f | grep -v "^??")
 	if [[ -z "$changed_files" ]]; then
 		log_info "No changed files found"
 		exit 0
@@ -56,21 +85,6 @@ if $all_files; then
 		git checkout -- "$file"
 		log_info "Checked out: $file"
 	done <<<"$changed_files"
-fi
-
-if $delete_untracked; then
-	status_output=$(git-status.sh)
-	untracked=$(echo "$status_output" | grep "^??" | cut -c 4-)
-	if [[ -z "$untracked" ]]; then
-		log_info "No untracked files to delete"
-	else
-		while IFS= read -r file; do
-			if [[ -e "$file" ]]; then
-				rm -rf "$file"
-				log_info "Deleted: $file"
-			fi
-		done <<<"$untracked"
-	fi
 fi
 
 if ! $all_files && ! $delete_untracked; then
