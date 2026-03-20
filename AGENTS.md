@@ -29,3 +29,7 @@ for branch in $branches; do
   git branch -D "$branch"
 done
 ```
+
+### Parameter Parsing
+
+When creating scripts with flag-based parameters, use the [param-parsing skill](./.agents/skills/param-parsing/SKILL.md) for consistent argument handling.
