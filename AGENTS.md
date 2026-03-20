@@ -41,3 +41,7 @@ Always use the logging functions from `src/logging/` instead of raw `echo` or `p
 ### Parameter Parsing
 
 When creating scripts with flag-based parameters, use the [param-parsing skill](./.agents/skills/param-parsing/SKILL.md) for consistent argument handling.
+
+### Documentation
+
+When creating a new script, add it to the Setup section in README.md with a function wrapper so users can call it from their shell. Use camelCase for the function name based on the script filename (e.g., `git-status.sh` → `gitStatus()`). Only add executable scripts meant to be called directly; exclude library/sourcing scripts like those in `src/logging/`.
