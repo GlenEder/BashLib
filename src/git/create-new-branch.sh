@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../logging/log-error.sh"
+
 # Ensure a branch name was provided as an argument
 if [ -z "$1" ]; then
-	echo "Usage: new-branch.sh <branch-name>"
+	log_error "Usage: new-branch.sh <branch-name>"
 	exit 1
 fi
 

@@ -2,13 +2,43 @@
 
 # log-info -- Log informational messages to stdout
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/../utils/term-colors.sh"
+log_info() {
+	local show_timestamp=false
 
-timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+	while [[ "$#" -gt 0 ]]; do
+		case $1 in
+		-t | --timestamp)
+			show_timestamp=true
+			shift
+			;;
+		*)
+			break
+			;;
+		esac
+	done
 
-printf "%s[%s] %sINFO%s: %s\n" "$CYAN" "$timestamp" "$BOLD_CYAN" "$RESET" "$*"
+	local message="$*"
 
-if [[ -n "$LOG_FILE" ]]; then
-    echo "[$timestamp] INFO: $*" >> "$LOG_FILE"
+	if [[ -z "$message" ]]; then
+		return
+	fi
+
+	SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+	source "${SCRIPT_DIR}/../utils/term-colors.sh"
+
+	if [[ -n "$LOG_FILE" ]]; then
+		local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+		echo "[$timestamp] INFO: $message" >>"$LOG_FILE"
+	fi
+
+	if $show_timestamp; then
+		local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+		printf "%s[%s] %sINFO%s: %s\n" "$CYAN" "$timestamp" "$BOLD_CYAN" "$RESET" "$message"
+	else
+		printf "%sINFO%s: %s\n" "$BOLD_CYAN" "$RESET" "$message"
+	fi
+}
+
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+	log_info "$@"
 fi

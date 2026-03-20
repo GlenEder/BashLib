@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../logging/log-info.sh"
+source "${SCRIPT_DIR}/../logging/log-error.sh"
+
 # Checkout the given branch if one was provided, then pull and exit
 if [ -n "$1" ]; then
 	git checkout "$1"
@@ -20,6 +24,7 @@ showing_remote=false
 page=0
 page_size=10
 total=${#branches[@]}
+log_info "Found $total local branches"
 
 while true; do
 	# Calculate the slice of branches to display on this page
@@ -57,7 +62,7 @@ while true; do
 
 	# Validate that the input is a positive integer
 	if ! [[ "$choice" =~ ^[0-9]+$ ]] || [ "$choice" -lt 1 ]; then
-		echo "Invalid selection. Please enter a number from the list."
+		log_error "Invalid selection. Please enter a number from the list."
 		continue
 	fi
 
@@ -69,8 +74,7 @@ while true; do
 			continue
 		else
 			# Fetch remote state and load all remote branches, stripping the remote prefix
-			echo ""
-			echo "Fetching remote branches..."
+			log_info "Fetching remote branches..."
 			git fetch -p
 			branches=()
 			while IFS= read -r branch; do
@@ -86,7 +90,7 @@ while true; do
 
 	# Validate the choice is within the displayed range
 	if [ "$choice" -gt $((end - start)) ]; then
-		echo "Invalid selection. Please enter a number from the list."
+		log_error "Invalid selection. Please enter a number from the list."
 		continue
 	fi
 

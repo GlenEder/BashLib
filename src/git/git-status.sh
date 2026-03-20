@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../logging/log-info.sh"
+source "${SCRIPT_DIR}/../logging/log-error.sh"
+
 # Help message displayed when -h or --help is passed
 HELP_MESSAGE="Usage: gits [-f/--filenames-only] [-h/--help]
 
@@ -18,12 +22,12 @@ while [[ "$#" -gt 0 ]]; do
 		shift 1
 		;;
 	-h | --help)
-		echo "$HELP_MESSAGE"
+		log_info "$HELP_MESSAGE"
 		exit 0
 		;;
 	*)
-		echo "Unknown param provided: $1"
-		echo "$HELP_MESSAGE"
+		log_error "Unknown param provided: $1"
+		log_info "$HELP_MESSAGE"
 		exit 1
 		;;
 	esac

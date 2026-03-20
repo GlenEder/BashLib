@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/../logging/log-info.sh"
+
 # fetch
 git fetch -pt
 
@@ -8,5 +11,6 @@ branches=$(git branch -v | grep "\[gone\]" | awk '{print $1}')
 
 # delete each of those locally
 for branch in $branches; do
-  git branch -D "$branch"
+	log_info "Deleting stale local branch: $branch"
+	git branch -D "$branch"
 done
