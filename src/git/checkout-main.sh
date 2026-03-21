@@ -23,4 +23,4 @@ git fetch --tags --force
 
 # Delete old branches
 log_info "Running delete-old-branches.sh"
-./delete-old-branches.sh
+${SCRIPT_DIR}/delete-old-branches.sh
