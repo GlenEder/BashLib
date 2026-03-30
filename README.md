@@ -17,6 +17,7 @@ main() { "$SCRIPT_DIR/git/checkout-main.sh" "$@"; }
 createBranch() { "$SCRIPT_DIR/git/create-new-branch.sh" "$@"; }
 deleteOldBranches() { "$SCRIPT_DIR/git/delete-old-branches.sh" "$@"; }
 checkout() { "$SCRIPT_DIR/git/checkout-branch.sh" "$@"; }
+updateDevroot() { "$SCRIPT_DIR/git/update-devroot.sh" "$@"; }
 ```
 
 After editing, run `source ~/.zshrc` to apply changes.
