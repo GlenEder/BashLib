@@ -5,6 +5,7 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/../logging/log-info.sh"
 source "${SCRIPT_DIR}/../logging/log-error.sh"
+source "${SCRIPT_DIR}/../logging/log-warning.sh"
 
 HELP_MESSAGE="Usage: $(basename "$0") [-h/--help] [-f/--fetch-only] <directory>
 
@@ -38,7 +39,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 if [[ $# -lt 1 ]]; then
-    log_error "Missing directory argument, checking for env DEVROOT"
+    log_warning "Missing directory argument, checking for env DEVROOT"
 
     if [[ -n $DEVROOT ]]; then
       echo -e "Using $DEVROOT"
@@ -93,12 +94,14 @@ update_repo() {
 
 updated_count=0
 error_count=0
+failed_repos=()
 
 for repo in "${repos[@]}"; do
     repo_name=$(basename "$repo")
     log_info -t "Updating $repo_name..."
     update_repo "$repo" "$fetch_only" &
     pids+=($!)
+    pid_to_repo+=([$!]="$repo_name")
 done
 
 for pid in "${pids[@]}"; do
@@ -106,7 +109,12 @@ for pid in "${pids[@]}"; do
         ((updated_count++))
     else
         ((error_count++))
+        failed_repos+=("${pid_to_repo[$pid]}")
     fi
 done
+
+if [[ $error_count -gt 0 ]]; then
+    log_error "Failed repos: ${failed_repos[*]}"
+fi
 
 log_info "Update complete: $updated_count succeeded, $error_count failed"
