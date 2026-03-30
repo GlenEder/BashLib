@@ -57,7 +57,7 @@ if [[ ! -d "$target_dir" ]]; then
     exit 1
 fi
 
-mapfile -t repos < <(find "$target_dir" -maxdepth 1 -type d -name '.git' -printf '%h\n' 2>/dev/null)
+mapfile -t repos < <(find "$target_dir" -maxdepth 2 -type d -name '.git' -exec dirname {} \; 2>/dev/null)
 
 if [[ ${#repos[@]} -eq 0 ]]; then
     log_info "No git repositories found in $target_dir"
@@ -75,37 +75,38 @@ update_repo() {
     if $fetch_only; then
         if git -C "$repo" fetch -pt 2>/dev/null; then
             echo "SUCCESS:$repo_name"
+            return 0
         else
             echo "FAILED:$repo_name"
+            return 1
         fi
     else
         if (cd "$repo" && "${SCRIPT_DIR}/checkout-main.sh"); then
             echo "SUCCESS:$repo_name"
+            return 0
         else
             echo "FAILED:$repo_name"
+            return 1
         fi
     fi
 }
+
+updated_count=0
+error_count=0
 
 for repo in "${repos[@]}"; do
     repo_name=$(basename "$repo")
     log_info -t "Updating $repo_name..."
     update_repo "$repo" "$fetch_only" &
+    pids+=($!)
 done
 
-updated_count=0
-error_count=0
-
-while IFS= read -r result; do
-    case $result in
-        SUCCESS:*)
-            ((updated_count++))
-            ;;
-        FAILED:*)
-            log_error "Failed to update ${result#FAILED:}"
-            ((error_count++))
-            ;;
-    esac
-done < <(wait)
+for pid in "${pids[@]}"; do
+    if wait "$pid"; then
+        ((updated_count++))
+    else
+        ((error_count++))
+    fi
+done
 
 log_info "Update complete: $updated_count succeeded, $error_count failed"
