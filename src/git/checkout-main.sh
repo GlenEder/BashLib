@@ -5,9 +5,6 @@ source "${SCRIPT_DIR}/../logging/log-info.sh"
 
 set -e
 
-# Fetch the latest remote state and prune stale tracking branches
-git fetch -pt
-
 # Check out the repo's "main" branch
 branch_name=$(git symbolic-ref refs/remotes/origin/HEAD | xargs basename)
 log_info "Checking out main branch: $branch_name"
