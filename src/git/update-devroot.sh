@@ -7,15 +7,17 @@ source "${SCRIPT_DIR}/../logging/log-info.sh"
 source "${SCRIPT_DIR}/../logging/log-error.sh"
 source "${SCRIPT_DIR}/../logging/log-warning.sh"
 
-HELP_MESSAGE="Usage: $(basename "$0") [-h/--help] [-f/--fetch-only] <directory>
+HELP_MESSAGE="Usage: $(basename "$0") [-h/--help] [-f/--fetch-only] [-i/--ignore-dir <dir>]... <directory>
 
 Update all git repositories in the specified directory.
 
 Options:
-  -h, --help       Show this help message
-  -f, --fetch-only Fetch latest changes only (skip checkout to main branch)"
+  -h, --help               Show this help message
+  -f, --fetch-only         Fetch latest changes only (skip checkout to main branch)
+  -i, --ignore-dir <dir>   Skip repositories whose directory name matches <dir> (repeatable)"
 
 fetch_only=false
+ignore_dirs=()
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -26,6 +28,10 @@ while [[ "$#" -gt 0 ]]; do
         -f | --fetch-only)
             fetch_only=true
             shift
+            ;;
+        -i | --ignore-dir)
+            ignore_dirs+=("$2")
+            shift 2
             ;;
         -*)
             log_error "Unknown option: $1"
@@ -66,6 +72,26 @@ if [[ ${#repos[@]} -eq 0 ]]; then
 fi
 
 log_info "Found ${#repos[@]} repository(ies) in $target_dir"
+
+# Filter out ignored directories
+if [[ ${#ignore_dirs[@]} -gt 0 ]]; then
+    filtered_repos=()
+    for repo in "${repos[@]}"; do
+        repo_basename=$(basename "$repo")
+        skip=false
+        for ignore in "${ignore_dirs[@]}"; do
+            if [[ "$repo_basename" == "$ignore" ]]; then
+                log_info "Skipping $repo_basename (ignored)"
+                skip=true
+                break
+            fi
+        done
+        if ! $skip; then
+            filtered_repos+=("$repo")
+        fi
+    done
+    repos=("${filtered_repos[@]}")
+fi
 
 update_repo() {
     local repo="$1"
