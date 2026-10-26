@@ -1,3 +1,6 @@
+> **Deprecated**: This repository has been superseded by [fishy-fish](https://github.com/GlenEder/fishy-fish), which contains native fish implementations of these scripts.
+> BashLib is kept for history and is no longer maintained.
+
 # BashLib
 A Collection of Reusable Bash Scripts
 
